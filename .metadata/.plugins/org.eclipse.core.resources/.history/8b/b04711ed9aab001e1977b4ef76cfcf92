@@ -1,0 +1,33 @@
+import org.opencv.core.Core;
+import org.opencv.core.Mat;
+import org.opencv.core.MatOfByte;
+import org.opencv.videoio.VideoCapture;
+import org.opencv.imgcodecs.Imgcodecs;
+
+import java.io.IOException;
+import java.io.OutputStream;
+import java.net.ServerSocket;
+import java.net.Socket;
+
+public class VideoServer {
+    public static void main(String[] args) {
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+
+        try {
+            VideoCapture videoCapture = new VideoCapture(0); // 0 represents the default camera
+            ServerSocket serverSocket = new ServerSocket(8080);
+
+            System.out.println("Server is running and waiting for connections...");
+
+            while (true) {
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("Client connected: " + clientSocket.getInetAddress());
+
+                // Create a new thread to handle the client
+                new ClientHandler(clientSocket, videoCapture).start();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

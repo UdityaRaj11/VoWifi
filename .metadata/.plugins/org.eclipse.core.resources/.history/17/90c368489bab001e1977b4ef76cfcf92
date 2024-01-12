@@ -1,0 +1,32 @@
+import javax.swing.*;
+import java.awt.*;
+import java.io.IOException;
+import java.io.InputStream;
+import java.net.Socket;
+
+public class VideoClient {
+    public static void main(String[] args) {
+        JFrame frame = new JFrame("Video Client");
+        JLabel label = new JLabel();
+        frame.add(label);
+        frame.setSize(640, 480);
+        frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+        frame.setVisible(true);
+
+        try {
+            Socket socket = new Socket("localhost", 8080);
+            InputStream inputStream = socket.getInputStream();
+
+            while (true) {
+                // Read the image from the server
+                Image image = ImageIO.read(inputStream);
+
+                // Display the received image on the client side
+                label.setIcon(new ImageIcon(image));
+                frame.repaint();
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}

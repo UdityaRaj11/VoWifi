@@ -1,0 +1,45 @@
+
+import org.opencv.core.*;
+import org.opencv.videoio.VideoCapture;
+import org.opencv.imgcodecs.Imgcodecs;
+
+import java.io.*;
+import java.net.*;
+public class VideoServer {
+    static Socket socket;
+    static VideoCapture camera;
+
+    public static void main(String[] args) {
+    	System.setProperty("java.library.path", "C:\\Users\\Uditya Raj\\CN Project\\opencv\\build\\java\\x64");
+        System.loadLibrary(Core.NATIVE_LIBRARY_NAME);
+
+        try {
+            ServerSocket serverSocket = new ServerSocket(4444);
+            socket = serverSocket.accept();
+            camera = new VideoCapture(0);
+
+            if (!camera.isOpened()) {
+                System.out.println("Error! Camera can't be opened!");
+                return;
+            }
+
+            Mat frame = new Mat();
+
+            while (true) {
+                if (camera.read(frame)) {
+                    MatOfByte outputStream = new MatOfByte();
+                    Imgcodecs.imencode(".png", frame, outputStream);
+                    byte[] buffer = outputStream.toArray();
+
+                    OutputStream outStream = socket.getOutputStream();
+                    DataOutputStream dataOutputStream = new DataOutputStream(outStream);
+
+                    dataOutputStream.writeInt(buffer.length);
+                    dataOutputStream.write(buffer, 0, buffer.length);
+                }
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+}
